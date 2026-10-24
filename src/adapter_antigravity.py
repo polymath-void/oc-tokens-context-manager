@@ -3,7 +3,7 @@
 
 Bridge between Token Manager and Google DeepMind Antigravity (agy).
 Dynamically applies token optimization profiles to Antigravity CLI
-by controlling active rules and skills discoverable by agy.
+by controlling active rules, skills, and plugins discoverable by agy.
 """
 
 import os
@@ -13,8 +13,10 @@ import shutil
 import argparse
 from pathlib import Path
 
-GLOBAL_CONFIG_DIR = Path("/data/data/com.termux/files/home/.gemini/config")
-WORKSPACE_AGENTS_DIR = Path("/data/data/com.termux/files/home/Projects/.agents")
+HOME_DIR = Path("/data/data/com.termux/files/home")
+GEMINI_ROOT_DIR = HOME_DIR / ".gemini"
+GLOBAL_CONFIG_DIR = GEMINI_ROOT_DIR / "config"
+WORKSPACE_AGENTS_DIR = HOME_DIR / "Projects" / ".agents"
 ACTIVE_PROFILE_FILE = GLOBAL_CONFIG_DIR / ".active_profile"
 
 class AntigravityAdapter:
@@ -24,17 +26,25 @@ class AntigravityAdapter:
         self.profiles_dir = self.config_dir / "profiles"
         self.platform = "antigravity"
         
-        # Master storage paths
-        self.global_store_skills = self.config_dir / ".store" / "skills"
-        self.global_store_rules = self.config_dir / ".store" / "rules"
-        
+        # 1. Config Skills & Rules
         self.active_skills_dir = self.config_dir / "skills"
         self.active_rules_dir = self.config_dir / "rules"
+        self.global_store_skills = self.config_dir / ".store" / "skills"
+        self.global_store_rules = self.config_dir / ".store" / "rules"
+
+        # 2. Root Gemini Skills (~/.gemini/skills)
+        self.gemini_skills_dir = GEMINI_ROOT_DIR / "skills"
+        self.gemini_store_skills = GEMINI_ROOT_DIR / ".store" / "skills"
+
+        # 3. Global Plugins (~/.gemini/config/plugins)
+        self.plugins_dir = self.config_dir / "plugins"
+        self.plugins_store = self.config_dir / ".store" / "plugins"
         
-        self.ws_store_skills = WORKSPACE_AGENTS_DIR / ".store" / "skills"
-        self.ws_store_rules = WORKSPACE_AGENTS_DIR / ".store" / "rules"
+        # 4. Workspace Customizations (~/Projects/.agents)
         self.ws_skills_dir = WORKSPACE_AGENTS_DIR / "skills"
         self.ws_rules_dir = WORKSPACE_AGENTS_DIR / "rules"
+        self.ws_store_skills = WORKSPACE_AGENTS_DIR / ".store" / "skills"
+        self.ws_store_rules = WORKSPACE_AGENTS_DIR / ".store" / "rules"
 
     def get_config(self):
         """Load platform configuration"""
@@ -61,89 +71,53 @@ class AntigravityAdapter:
             return "antigravity"
         return "full"
 
+    def _copy_dir_to_store(self, source_dir: Path, store_dir: Path):
+        """Safely copy or preserve existing directory contents in store"""
+        if not source_dir.exists():
+            return
+        store_dir.mkdir(parents=True, exist_ok=True)
+        for item in source_dir.iterdir():
+            dest = store_dir / item.name
+            if not os.path.lexists(dest):
+                if item.is_symlink():
+                    target = os.readlink(item)
+                    os.symlink(target, dest)
+                elif item.is_dir():
+                    shutil.copytree(item, dest, symlinks=True)
+                else:
+                    shutil.copy2(item, dest)
+
     def init_master_store(self):
-        """Ensure all original skills and rules are safely preserved in .store directories"""
-        # Global skills
-        if not self.global_store_skills.exists():
-            self.global_store_skills.mkdir(parents=True, exist_ok=True)
-            if self.active_skills_dir.exists():
-                for item in self.active_skills_dir.iterdir():
-                    dest = self.global_store_skills / item.name
-                    if not dest.exists():
-                        if item.is_symlink():
-                            target = os.readlink(item)
-                            os.symlink(target, dest)
-                        elif item.is_dir():
-                            shutil.copytree(item, dest, symlinks=True)
-                        else:
-                            shutil.copy2(item, dest)
-        
-        # Global rules
-        if not self.global_store_rules.exists():
-            self.global_store_rules.mkdir(parents=True, exist_ok=True)
-            if self.active_rules_dir.exists():
-                for item in self.active_rules_dir.iterdir():
-                    dest = self.global_store_rules / item.name
-                    if not dest.exists():
-                        if item.is_symlink():
-                            target = os.readlink(item)
-                            os.symlink(target, dest)
-                        elif item.is_dir():
-                            shutil.copytree(item, dest, symlinks=True)
-                        else:
-                            shutil.copy2(item, dest)
-
-        # Workspace skills
-        if WORKSPACE_AGENTS_DIR.exists() and not self.ws_store_skills.exists():
-            self.ws_store_skills.mkdir(parents=True, exist_ok=True)
-            if self.ws_skills_dir.exists():
-                for item in self.ws_skills_dir.iterdir():
-                    dest = self.ws_store_skills / item.name
-                    if not dest.exists():
-                        if item.is_symlink():
-                            target = os.readlink(item)
-                            os.symlink(target, dest)
-                        elif item.is_dir():
-                            shutil.copytree(item, dest, symlinks=True)
-                        else:
-                            shutil.copy2(item, dest)
-
-        # Workspace rules
-        if WORKSPACE_AGENTS_DIR.exists() and not self.ws_store_rules.exists():
-            self.ws_store_rules.mkdir(parents=True, exist_ok=True)
-            if self.ws_rules_dir.exists():
-                for item in self.ws_rules_dir.iterdir():
-                    dest = self.ws_store_rules / item.name
-                    if not dest.exists():
-                        if item.is_symlink():
-                            target = os.readlink(item)
-                            os.symlink(target, dest)
-                        elif item.is_dir():
-                            shutil.copytree(item, dest, symlinks=True)
-                        else:
-                            shutil.copy2(item, dest)
+        """Ensure all original skills, rules, and plugins are safely preserved in master stores"""
+        self._copy_dir_to_store(self.active_skills_dir, self.global_store_skills)
+        self._copy_dir_to_store(self.active_rules_dir, self.global_store_rules)
+        self._copy_dir_to_store(self.gemini_skills_dir, self.gemini_store_skills)
+        self._copy_dir_to_store(self.plugins_dir, self.plugins_store)
+        if WORKSPACE_AGENTS_DIR.exists():
+            self._copy_dir_to_store(self.ws_skills_dir, self.ws_store_skills)
+            self._copy_dir_to_store(self.ws_rules_dir, self.ws_store_rules)
 
     def _clear_and_symlink(self, target_dir: Path, source_store: Path, allowed_names: set = None):
         """Safely re-populate target_dir with symlinks pointing to source_store entries"""
         target_dir.mkdir(parents=True, exist_ok=True)
-        # Clear existing items
         for item in target_dir.iterdir():
-            if item.is_symlink() or item.is_file():
-                item.unlink()
-            elif item.is_dir():
-                shutil.rmtree(item)
+            if os.path.lexists(item):
+                if item.is_symlink() or item.is_file():
+                    item.unlink()
+                elif item.is_dir():
+                    shutil.rmtree(item)
 
-        # Re-link matching items
         if not source_store.exists():
             return
 
         for item in source_store.iterdir():
             if allowed_names is None or item.name in allowed_names or item.stem in allowed_names:
                 dest = target_dir / item.name
-                os.symlink(item.resolve(), dest)
+                if not os.path.lexists(dest):
+                    os.symlink(item.resolve(), dest)
 
     def apply_profile(self, profile_name: str = None):
-        """Apply the specified profile to ~/.gemini/config and workspace .agents"""
+        """Apply the specified profile across all Antigravity discovery paths"""
         self.init_master_store()
         
         if not profile_name:
@@ -159,18 +133,19 @@ class AntigravityAdapter:
         profile_file = self.profiles_dir / f"{profile_name}.json"
         
         if profile_name in ["full", "all"]:
-            # Restore all skills and rules
+            # Restore everything across all paths
             self._clear_and_symlink(self.active_skills_dir, self.global_store_skills, allowed_names=None)
             self._clear_and_symlink(self.active_rules_dir, self.global_store_rules, allowed_names=None)
+            self._clear_and_symlink(self.gemini_skills_dir, self.gemini_store_skills, allowed_names=None)
+            self._clear_and_symlink(self.plugins_dir, self.plugins_store, allowed_names=None)
             if WORKSPACE_AGENTS_DIR.exists():
                 self._clear_and_symlink(self.ws_skills_dir, self.ws_store_skills, allowed_names=None)
                 self._clear_and_symlink(self.ws_rules_dir, self.ws_store_rules, allowed_names=None)
             ACTIVE_PROFILE_FILE.write_text("full\n")
-            print("  [AGY Token Manager] Activated FULL profile (all skills & rules loaded)")
+            print("  [AGY Token Manager] Activated FULL profile (all skills & plugins restored)")
             return True
 
         if not profile_file.exists():
-            # Fallback to minimal if profile file not found
             profile_file = self.profiles_dir / "minimal.json"
 
         # Load profile JSON
@@ -195,11 +170,17 @@ class AntigravityAdapter:
             allowed_rules.add(inst_name)
             allowed_rules.add(Path(inst).stem)
 
-        # Apply to global config
+        # 1. Config skills & rules
         self._clear_and_symlink(self.active_skills_dir, self.global_store_skills, allowed_names=preload_skills)
         self._clear_and_symlink(self.active_rules_dir, self.global_store_rules, allowed_names=allowed_rules)
 
-        # Apply to workspace .agents if present
+        # 2. Root Gemini skills (~/.gemini/skills)
+        self._clear_and_symlink(self.gemini_skills_dir, self.gemini_store_skills, allowed_names=preload_skills)
+
+        # 3. Global plugins (~/.gemini/config/plugins) - isolate during minimal
+        self._clear_and_symlink(self.plugins_dir, self.plugins_store, allowed_names=set())
+
+        # 4. Workspace .agents
         if WORKSPACE_AGENTS_DIR.exists():
             self._clear_and_symlink(self.ws_skills_dir, self.ws_store_skills, allowed_names=preload_skills)
             self._clear_and_symlink(self.ws_rules_dir, self.ws_store_rules, allowed_names=allowed_rules)
@@ -233,16 +214,23 @@ class AntigravityAdapter:
     def status(self):
         """Display current Antigravity token context manager status"""
         active = self.get_active_profile()
-        global_skills_cnt = len([p for p in self.active_skills_dir.iterdir() if p.is_dir() or p.is_symlink()]) if self.active_skills_dir.exists() else 0
-        global_rules_cnt = len(list(self.active_rules_dir.glob("*.md"))) if self.active_rules_dir.exists() else 0
         
-        ws_skills_cnt = len([p for p in self.ws_skills_dir.iterdir() if p.is_dir() or p.is_symlink()]) if self.ws_skills_dir.exists() else 0
-        ws_rules_cnt = len(list(self.ws_rules_dir.glob("*.md"))) if self.ws_rules_dir.exists() else 0
+        def count_items(d: Path, glob_pat="*"):
+            if not d.exists():
+                return 0
+            return len([p for p in d.glob(glob_pat) if p.is_dir() or p.is_symlink() or p.is_file()])
+
+        cfg_skills = count_items(self.active_skills_dir)
+        gem_skills = count_items(self.gemini_skills_dir)
+        ws_skills = count_items(self.ws_skills_dir)
+        plugins_cnt = count_items(self.plugins_dir)
         
-        total_skills = global_skills_cnt + ws_skills_cnt
-        total_rules = global_rules_cnt + ws_rules_cnt
+        cfg_rules = count_items(self.active_rules_dir, "*.md")
+        ws_rules = count_items(self.ws_rules_dir, "*.md")
         
-        # Estimate token overhead
+        total_skills = cfg_skills + gem_skills + ws_skills
+        total_rules = cfg_rules + ws_rules
+        
         est_tokens = (total_skills * 180) + (total_rules * 450)
         
         print("\n" + "=" * 60)
@@ -250,11 +238,12 @@ class AntigravityAdapter:
         print("=" * 60)
         print(f"  Active Profile:       {active.upper()}")
         print(f"  Configuration File:   {self.config_file}")
-        print(f"  Active Skills:        {total_skills} (Global: {global_skills_cnt}, Workspace: {ws_skills_cnt})")
-        print(f"  Active Rules:         {total_rules} (Global: {global_rules_cnt}, Workspace: {ws_rules_cnt})")
+        print(f"  Active Skills:        {total_skills} (Config: {cfg_skills}, Root: {gem_skills}, WS: {ws_skills})")
+        print(f"  Active Plugins:       {plugins_cnt}")
+        print(f"  Active Rules:         {total_rules} (Config: {cfg_rules}, WS: {ws_rules})")
         print(f"  Estimated Overhead:   ~{est_tokens:,} tokens / prompt turn")
         if active in ["minimal", "antigravity"]:
-            print("  Token Reduction:      ~92% saved vs full profile (~28,000 tokens)")
+            print("  Token Reduction:      ~94% saved vs full profile (~28,000 tokens)")
         print("=" * 60 + "\n")
 
 
