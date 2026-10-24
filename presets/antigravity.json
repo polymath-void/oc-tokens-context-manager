@@ -1,0 +1,76 @@
+{
+  "$schema": "https://antigravity.google/config.json",
+  "platform": "antigravity",
+  "model": "Gemini 3.8 Flash (High)",
+  "small_model": "Gemini 3.8 Flash (High)",
+  
+  "extends": "profiles/minimal.json",
+  
+  "instructions": [
+    "/data/data/com.termux/files/home/Projects/AGENTS.md",
+    "/data/data/com.termux/files/home/.gemini/config/rules/device_architecture.md",
+    "/data/data/com.termux/files/home/.gemini/config/rules/antigravity_garage_integration.md"
+  ],
+  
+  "skills": {
+    "paths": [
+      "/data/data/com.termux/files/home/.gemini/config/skills",
+      "/data/data/com.termux/files/home/Projects/.agents/skills",
+      "/data/data/com.termux/files/home/.gemini/antigravity-cli/builtin/skills"
+    ],
+    "autoload": false,
+    "preload": [
+      "qa-analyzer",
+      "safe-filesystem",
+      "polymath-core",
+      "targeted-search"
+    ]
+  },
+  
+  "rules": {
+    "paths": [
+      "/data/data/com.termux/files/home/.gemini/config/rules",
+      "/data/data/com.termux/files/home/Projects/.agents/rules"
+    ]
+  },
+  
+  "context": {
+    "max_tokens": 1048576,
+    "summarization": {
+      "enabled": true,
+      "threshold": 250000,
+      "target_size": 100000,
+      "preserve_recent": 30000,
+      "strategy": "progressive",
+      "adaptive": true,
+      "model_aware": true
+    },
+    "dynamic_loading": {
+      "enabled": true,
+      "start_minimal": true,
+      "load_on_demand": true
+    },
+    "ml_preload": {
+      "enabled": true,
+      "model": "usage_patterns",
+      "confidence_threshold": 0.35
+    },
+    "analytics": {
+      "enabled": true,
+      "track_tokens": true,
+      "track_skills": true,
+      "export_format": "json"
+    }
+  },
+  
+  "profiles": {
+    "default": "minimal",
+    "available": [
+      "minimal",
+      "antigravity",
+      "coding",
+      "android",
+      "workspace"
+    ]
+  }
+}

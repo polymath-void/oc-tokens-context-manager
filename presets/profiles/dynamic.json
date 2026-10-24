@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "_comment": "Dynamic profile with automatic context management and summarization",
+  
+  "model": "apmix/claude-sonnet-4-6-free",
+  "small_model": "opencode/nemotron-3.5-lightning-free",
+  
+  "instructions": [
+    "/data/data/com.termux/files/home/.config/opencode/instructions/dynamic-context-manager.md"
+  ],
+  
+  "skills": {
+    "paths": [
+      "/data/data/com.termux/files/home/.gemini/config/skills",
+      "/data/data/com.termux/files/home/Projects/.agents/skills"
+    ],
+    "autoload": false
+  },
+  
+  "context": {
+    "max_tokens": 150000,
+    "summarization": {
+      "enabled": true,
+      "threshold": 120000,
+      "target_size": 80000,
+      "preserve_recent": 20000,
+      "strategy": "progressive"
+    }
+  },
+  
+  "agent": {
+    "nemotron": {
+      "model": "opencode/nemotron-3-ultra-free",
+      "description": "Fast free coding agent",
+      "mode": "all"
+    },
+    "lightning": {
+      "model": "opencode/nemotron-3.5-lightning-free",
+      "description": "Ultra-fast reasoning",
+      "mode": "all"
+    }
+  }
+}

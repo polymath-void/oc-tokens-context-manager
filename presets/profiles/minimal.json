@@ -1,0 +1,44 @@
+{
+  "$schema": "https://antigravity.google/config.json",
+  "name": "minimal",
+  "description": "Minimal Antigravity profile: ultra-low token overhead (~1.5k tokens) with essential skills and rules only",
+  "platform": "antigravity",
+  "model": "Gemini 3.8 Flash (High)",
+  "small_model": "Gemini 3.8 Flash (High)",
+  "instructions": [
+    "/data/data/com.termux/files/home/Projects/AGENTS.md",
+    "/data/data/com.termux/files/home/.gemini/config/rules/device_architecture.md",
+    "/data/data/com.termux/files/home/.gemini/config/rules/antigravity_garage_integration.md"
+  ],
+  "skills": {
+    "autoload": false,
+    "preload": [
+      "qa-analyzer",
+      "safe-filesystem",
+      "polymath-core",
+      "targeted-search"
+    ]
+  },
+  "rules": {
+    "paths": [
+      "/data/data/com.termux/files/home/.gemini/config/rules",
+      "/data/data/com.termux/files/home/Projects/.agents/rules"
+    ]
+  },
+  "context": {
+    "max_tokens": 1048576,
+    "dynamic_loading": {
+      "start_minimal": true,
+      "load_on_demand": true
+    },
+    "summarization": {
+      "enabled": true,
+      "threshold": 250000,
+      "target_size": 100000,
+      "preserve_recent": 30000,
+      "strategy": "progressive",
+      "adaptive": true,
+      "model_aware": true
+    }
+  }
+}

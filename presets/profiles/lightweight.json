@@ -1,0 +1,32 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "apmix/claude-sonnet-4-6-free",
+  "small_model": "opencode/nemotron-3.5-lightning-free",
+  
+  "instructions": [],
+  
+  "skills": {
+    "paths": [],
+    "autoload": false
+  },
+  
+  "command": {
+    "work": {
+      "description": "Switch to full workspace mode with all skills",
+      "template": "Load full configuration from opencode.json with all skills, tools, and environment instructions."
+    }
+  },
+  
+  "agent": {
+    "nemotron": {
+      "model": "opencode/nemotron-3-ultra-free",
+      "description": "Fast free coding agent",
+      "mode": "all"
+    },
+    "lightning": {
+      "model": "opencode/nemotron-3.5-lightning-free",
+      "description": "Ultra-fast reasoning",
+      "mode": "all"
+    }
+  }
+}

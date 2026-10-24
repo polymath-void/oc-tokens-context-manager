@@ -1,0 +1,30 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "apmix/claude-sonnet-4-6-free",
+  "small_model": "opencode/nemotron-3.5-lightning-free",
+  
+  "instructions": [
+    "/data/data/com.termux/files/home/.config/opencode/instructions/termux-core.md"
+  ],
+  
+  "skills": {
+    "paths": [
+      "/data/data/com.termux/files/home/.gemini/config/skills"
+    ],
+    "autoload": false,
+    "preload": [
+      "android-ninja",
+      "android-cli",
+      "edge-to-edge",
+      "navigation-3"
+    ]
+  },
+  
+  "agent": {
+    "nemotron": {
+      "model": "opencode/nemotron-3-ultra-free",
+      "description": "Fast free coding agent",
+      "mode": "all"
+    }
+  }
+}

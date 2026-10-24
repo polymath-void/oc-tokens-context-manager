@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database and local backup files
+data/*.db
+data/*.sqlite
+data/*.json.backup*
+
+# Installation backups
+backups/*
+!backups/.gitkeep
+
+# System / Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

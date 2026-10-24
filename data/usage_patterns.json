@@ -1,0 +1,78 @@
+{
+  "skill_frequency": {
+    "android-ninja": 4,
+    "navigation-3": 2,
+    "edge-to-edge": 2,
+    "jetpack-compose-performance": 2,
+    "polymath-core": 2,
+    "qa-analyzer": 2,
+    "safe-filesystem": 2,
+    "generative-tui": 2,
+    "terminal-browser": 2
+  },
+  "skill_pairs": {
+    "android-ninja+navigation-3": 2,
+    "android-ninja+edge-to-edge": 2,
+    "edge-to-edge+navigation-3": 2,
+    "android-ninja+jetpack-compose-performance": 2,
+    "polymath-core+qa-analyzer": 2,
+    "polymath-core+safe-filesystem": 2,
+    "qa-analyzer+safe-filesystem": 2,
+    "generative-tui+terminal-browser": 2
+  },
+  "task_skill_mapping": {
+    "android_development": {
+      "android-ninja": 4,
+      "navigation-3": 2,
+      "edge-to-edge": 2,
+      "jetpack-compose-performance": 2
+    },
+    "workspace_operations": {
+      "polymath-core": 2,
+      "qa-analyzer": 2,
+      "safe-filesystem": 2
+    },
+    "ui_frontend": {
+      "generative-tui": 2,
+      "terminal-browser": 2
+    }
+  },
+  "time_patterns": {
+    "4": {
+      "android-ninja": 4,
+      "navigation-3": 2,
+      "edge-to-edge": 2,
+      "jetpack-compose-performance": 2,
+      "polymath-core": 2,
+      "qa-analyzer": 2,
+      "safe-filesystem": 2,
+      "generative-tui": 2,
+      "terminal-browser": 2
+    }
+  },
+  "file_type_skills": {
+    ".kt": {
+      "android-ninja": 4,
+      "navigation-3": 2,
+      "edge-to-edge": 2,
+      "jetpack-compose-performance": 2
+    },
+    ".xml": {
+      "android-ninja": 2,
+      "navigation-3": 2,
+      "edge-to-edge": 2
+    },
+    ".py": {
+      "polymath-core": 2,
+      "qa-analyzer": 2,
+      "safe-filesystem": 2,
+      "generative-tui": 2,
+      "terminal-browser": 2
+    },
+    ".md": {
+      "polymath-core": 2,
+      "qa-analyzer": 2,
+      "safe-filesystem": 2
+    }
+  }
+}

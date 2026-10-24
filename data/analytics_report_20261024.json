@@ -1,0 +1,60 @@
+{
+  "generated_at": "2026-10-24T04:33:20.752455",
+  "period_days": 30,
+  "token_stats": {
+    "total_tokens": 179249,
+    "session_count": 50,
+    "avg_tokens_per_session": 3584.98,
+    "by_profile": {
+      "android": 83568,
+      "coding": 46190,
+      "minimal": 7561,
+      "workspace": 41930
+    },
+    "summarizations": {
+      "count": 10,
+      "avg_reduction": 42010.7
+    }
+  },
+  "skill_stats": {
+    "top_skills": [
+      [
+        "android-ninja",
+        17,
+        4.470588235294118
+      ],
+      [
+        "qa-analyzer",
+        16,
+        5.625
+      ],
+      [
+        "polymath-core",
+        13,
+        6.0
+      ],
+      [
+        "terminal-browser",
+        11,
+        6.454545454545454
+      ],
+      [
+        "navigation-3",
+        10,
+        4.0
+      ],
+      [
+        "edge-to-edge",
+        10,
+        5.0
+      ]
+    ]
+  },
+  "savings": {
+    "actual_tokens": 179249,
+    "old_system_tokens": 950000,
+    "tokens_saved": 770751,
+    "savings_percent": 81.13168421052632,
+    "cost_saved_estimate": 7.707510000000001
+  }
+}
